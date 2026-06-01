@@ -17,13 +17,28 @@ func scaleImage(img image.Image) image.Image {
 }
 
 func loadImage(u fyne.URI) fyne.CanvasObject {
-	res, err := storage.LoadResourceFromURI(u)
+	img := canvas.NewImageFromResource(nil)
+	img.FillMode = canvas.ImageFillContain
+	img.ScaleMode = canvas.ImageScaleFastest
+
+	if u == nil {
+		return img
+	}
+
+	r, err := storage.Reader(u)
 	if err != nil {
 		log.Println("Error reading image", err)
-		return canvas.NewRectangle(color.Black)
+		return img
 	}
-	img := canvas.NewImageFromResource(res)
-	img.FillMode = canvas.ImageFillContain
+
+	src, _, err := image.Decode(r)
+	if err != nil {
+		log.Println("Error decoding image", err)
+		return img
+	}
+
+	thumb := scaleImage(src)
+	img.Image = thumb
 	return img
 }
 
@@ -55,7 +70,11 @@ func (i *itemLayout) Layout(objs []fyne.CanvasObject, size fyne.Size) {
 }
 
 func makeImageItem(u fyne.URI) fyne.CanvasObject {
-	label := canvas.NewText(u.Name(), color.Gray{128})
+	text := ""
+	if u != nil {
+		text = u.Name()
+	}
+	label := canvas.NewText(text, color.Gray{128})
 	label.Alignment = fyne.TextAlignCenter
 
 	bgColor := &color.NRGBA{R: 255, G: 255, B: 255, A: 224}

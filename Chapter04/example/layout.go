@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/widget"
 )
 
 func isImage(file fyne.URI) bool {
@@ -37,8 +38,23 @@ func makeImageGrid(images []fyne.URI) fyne.CanvasObject {
 		items = append(items, img)
 	}
 
-	cellSize := fyne.NewSize(160, 120)
-	return container.NewGridWrap(cellSize, items...)
+	return widget.NewGridWrap(func() int {
+		return len(items)
+	}, func() fyne.CanvasObject {
+		return makeImageItem(nil)
+	}, func(id widget.GridWrapItemID, o fyne.CanvasObject) {
+		c := o.(*fyne.Container)
+		img := c.Objects[0].(*canvas.Image)
+		text := c.Objects[3].(*canvas.Text)
+
+		u := images[id]
+		text.Text = u.Name()
+		text.Refresh()
+
+		loaded := loadImage(u).(*canvas.Image)
+		img.Image = loaded.Image
+		img.Refresh()
+	})
 }
 
 func makeStatus(dir fyne.ListableURI, images []fyne.URI) fyne.CanvasObject {
