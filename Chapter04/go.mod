@@ -1,4 +1,4 @@
-module github.com/PacktPublishing/Building-Cross-Platform-GUI-Applications-with-Fyne/Chapter04
+module github.com/PacktPublishing/Building-Cross-Platform-GUI-Applications-with-Fyne-Second-Edition/Chapter04
 
 go 1.19
 
